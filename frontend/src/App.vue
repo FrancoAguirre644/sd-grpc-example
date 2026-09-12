@@ -12,6 +12,12 @@ interface Turno {
 const turnos = ref<Turno[]>([])
 const loading = ref(false)
 const error = ref('')
+const creating = ref(false)
+const success = ref('')
+
+const paciente = ref('')
+const fecha = ref('')
+const hora = ref('')
 
 async function cargarTurnos() {
   loading.value = true
@@ -34,6 +40,42 @@ async function cargarTurnos() {
   }
 }
 
+async function crearTurno() {
+  creating.value = true
+  error.value = ''
+  success.value = ''
+
+  try {
+    const response = await fetch('http://localhost:8000/turnos', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        paciente: paciente.value,
+        fecha: fecha.value,
+        hora: hora.value,
+      }),
+    })
+
+    if (!response.ok) {
+      throw new Error('No se pudo crear el turno.')
+    }
+
+    paciente.value = ''
+    fecha.value = ''
+    hora.value = ''
+
+    success.value = 'Turno creado correctamente.'
+
+    await cargarTurnos()
+  } catch (err) {
+    error.value = 'No se pudo crear el turno.'
+  } finally {
+    creating.value = false
+  }
+}
+
 onMounted(() => {
   cargarTurnos()
 })
@@ -49,8 +91,95 @@ onMounted(() => {
         </h1>
 
         <p class="mt-2 text-gray-600">
-          Consulte los turnos disponibles y reservados.
+          Consulte y gestione los turnos disponibles.
         </p>
+      </div>
+
+      <div class="mb-8 rounded-lg bg-white p-6 shadow">
+        <h2 class="mb-6 text-xl font-semibold text-gray-900">
+          Nuevo turno
+        </h2>
+
+        <form
+          class="grid gap-4 md:grid-cols-4"
+          @submit.prevent="crearTurno"
+        >
+          <div class="md:col-span-2">
+            <label
+              for="paciente"
+              class="mb-2 block text-sm font-medium text-gray-700"
+            >
+              Paciente
+            </label>
+
+            <input
+              id="paciente"
+              v-model="paciente"
+              type="text"
+              required
+              class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+              placeholder="Ingrese el nombre del paciente"
+            />
+          </div>
+
+          <div>
+            <label
+              for="fecha"
+              class="mb-2 block text-sm font-medium text-gray-700"
+            >
+              Fecha
+            </label>
+
+            <input
+              id="fecha"
+              v-model="fecha"
+              type="date"
+              required
+              class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+            />
+          </div>
+
+          <div>
+            <label
+              for="hora"
+              class="mb-2 block text-sm font-medium text-gray-700"
+            >
+              Hora
+            </label>
+
+            <input
+              id="hora"
+              v-model="hora"
+              type="time"
+              required
+              class="w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+            />
+          </div>
+
+          <div class="md:col-span-4">
+            <button
+              type="submit"
+              :disabled="creating"
+              class="rounded-lg bg-blue-600 px-5 py-2.5 font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {{ creating ? 'Creando...' : 'Crear turno' }}
+            </button>
+          </div>
+        </form>
+
+        <div
+          v-if="success"
+          class="mt-4 rounded-lg bg-green-50 p-4 text-sm text-green-700"
+        >
+          {{ success }}
+        </div>
+
+        <div
+          v-if="error"
+          class="mt-4 rounded-lg bg-red-50 p-4 text-sm text-red-700"
+        >
+          {{ error }}
+        </div>
       </div>
 
       <div
@@ -63,16 +192,15 @@ onMounted(() => {
       </div>
 
       <div
-        v-else-if="error"
-        class="rounded-lg bg-red-50 p-6 text-red-700 shadow"
-      >
-        {{ error }}
-      </div>
-
-      <div
         v-else
         class="overflow-hidden rounded-lg bg-white shadow"
       >
+        <div class="p-6">
+          <h2 class="text-xl font-semibold text-gray-900">
+            Turnos registrados
+          </h2>
+        </div>
+
         <div class="overflow-x-auto">
           <table class="w-full text-left text-sm">
             <thead class="bg-gray-50 text-gray-700">
