@@ -1,6 +1,5 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel
 
 from grpc_client import (
     listar_turnos,
@@ -8,6 +7,7 @@ from grpc_client import (
     crear_turno,
     reservar_turno,
 )
+from models import CrearTurnoRequest
 
 
 app = FastAPI()
@@ -19,12 +19,6 @@ app.add_middleware(
     allow_methods=['*'],
     allow_headers=['*'],
 )
-
-
-class CrearTurnoRequest(BaseModel):
-    paciente: str
-    fecha: str
-    hora: str
 
 
 @app.get('/turnos')
