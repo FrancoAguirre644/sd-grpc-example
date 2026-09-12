@@ -1,0 +1,39 @@
+syntax = "proto3";
+
+package turnos;
+
+service TurnoService {
+    rpc CrearTurno (CrearTurnoRequest) returns (Turno);
+    rpc ObtenerTurno (ObtenerTurnoRequest) returns (Turno);
+    rpc ListarTurnos (ListarTurnosRequest) returns (ListaTurnos);
+    rpc ReservarTurno (ReservarTurnoRequest) returns (Turno);
+}
+
+message Turno {
+    int32 id = 1;
+    string paciente = 2;
+    string fecha = 3;
+    string hora = 4;
+    string estado = 5;
+}
+
+message CrearTurnoRequest {
+    string paciente = 1;
+    string fecha = 2;
+    string hora = 3;
+}
+
+message ObtenerTurnoRequest {
+    int32 id = 1;
+}
+
+message ListarTurnosRequest {
+}
+
+message ListaTurnos {
+    repeated Turno turnos = 1;
+}
+
+message ReservarTurnoRequest {
+    int32 id = 1;
+}
