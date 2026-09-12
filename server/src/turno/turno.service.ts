@@ -1,8 +1,11 @@
 import { Injectable } from '@nestjs/common';
 
+import { CrearTurnoDto } from './dto/crear-turno.dto';
+import { Turno } from './interfaces/turno.interface';
+
 @Injectable()
 export class TurnoService {
-  private readonly turnos = [
+  private readonly turnos: Turno[] = [
     {
       id: 1,
       paciente: 'Juan Pérez',
@@ -26,20 +29,20 @@ export class TurnoService {
     },
   ];
 
-  listarTurnos() {
+  listarTurnos(): Turno[] {
     return this.turnos;
   }
 
-  obtenerTurno(id: number) {
+  obtenerTurno(id: number): Turno | undefined {
     return this.turnos.find((turno) => turno.id === id);
   }
 
-  crearTurno(paciente: string, fecha: string, hora: string) {
-    const nuevoTurno = {
+  crearTurno(data: CrearTurnoDto): Turno {
+    const nuevoTurno: Turno = {
       id: this.turnos.length + 1,
-      paciente,
-      fecha,
-      hora,
+      paciente: data.paciente,
+      fecha: data.fecha,
+      hora: data.hora,
       estado: 'DISPONIBLE',
     };
 
@@ -48,7 +51,7 @@ export class TurnoService {
     return nuevoTurno;
   }
 
-  reservarTurno(id: number) {
+  reservarTurno(id: number): Turno | undefined {
     const turno = this.turnos.find((turno) => turno.id === id);
 
     if (!turno) {

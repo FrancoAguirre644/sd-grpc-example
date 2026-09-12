@@ -1,11 +1,12 @@
 import { Controller } from '@nestjs/common';
 import { GrpcMethod } from '@nestjs/microservices';
 
+import { CrearTurnoDto } from './dto/crear-turno.dto';
 import { TurnoService } from './turno.service';
 
 @Controller()
 export class TurnoController {
-  constructor(private readonly turnoService: TurnoService) {}
+  constructor(private readonly turnoService: TurnoService) { }
 
   @GrpcMethod('TurnoService', 'ListarTurnos')
   listarTurnos() {
@@ -20,16 +21,8 @@ export class TurnoController {
   }
 
   @GrpcMethod('TurnoService', 'CrearTurno')
-  crearTurno(data: {
-    paciente: string;
-    fecha: string;
-    hora: string;
-  }) {
-    return this.turnoService.crearTurno(
-      data.paciente,
-      data.fecha,
-      data.hora,
-    );
+  crearTurno(data: CrearTurnoDto) {
+    return this.turnoService.crearTurno(data);
   }
 
   @GrpcMethod('TurnoService', 'ReservarTurno')
