@@ -13,6 +13,7 @@ const turnos = ref<Turno[]>([])
 const loading = ref(false)
 const error = ref('')
 const creating = ref(false)
+const reserving = ref<number | null>(null)
 const success = ref('')
 
 const paciente = ref('')
@@ -73,6 +74,33 @@ async function crearTurno() {
     error.value = 'No se pudo crear el turno.'
   } finally {
     creating.value = false
+  }
+}
+
+async function reservarTurno(id: number) {
+  reserving.value = id
+  error.value = ''
+  success.value = ''
+
+  try {
+    const response = await fetch(
+      `http://localhost:8000/turnos/${id}/reservar`,
+      {
+        method: 'POST',
+      },
+    )
+
+    if (!response.ok) {
+      throw new Error('No se pudo reservar el turno.')
+    }
+
+    success.value = 'Turno reservado correctamente.'
+
+    await cargarTurnos()
+  } catch (err) {
+    error.value = 'No se pudo reservar el turno.'
+  } finally {
+    reserving.value = null
   }
 }
 
@@ -220,6 +248,10 @@ onMounted(() => {
                 <th class="px-6 py-4 font-semibold">
                   Estado
                 </th>
+
+                <th class="px-6 py-4 font-semibold">
+                  Acciones
+                </th>
               </tr>
             </thead>
 
@@ -253,11 +285,30 @@ onMounted(() => {
                     {{ turno.estado }}
                   </span>
                 </td>
+
+                <td class="px-6 py-4">
+                  <button
+                    v-if="turno.estado === 'DISPONIBLE'"
+                    type="button"
+                    :disabled="reserving === turno.id"
+                    class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
+                    @click="reservarTurno(turno.id)"
+                  >
+                    {{ reserving === turno.id ? 'Reservando...' : 'Reservar' }}
+                  </button>
+
+                  <span
+                    v-else
+                    class="text-sm text-gray-500"
+                  >
+                    No disponible
+                  </span>
+                </td>
               </tr>
 
               <tr v-if="turnos.length === 0">
                 <td
-                  colspan="4"
+                  colspan="5"
                   class="px-6 py-8 text-center text-gray-500"
                 >
                   No hay turnos registrados.
