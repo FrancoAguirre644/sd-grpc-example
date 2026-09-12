@@ -18,4 +18,17 @@ export class TurnoController {
   obtenerTurno(data: { id: number }) {
     return this.turnoService.obtenerTurno(data.id);
   }
+
+  @GrpcMethod('TurnoService', 'CrearTurno')
+  crearTurno(data: {
+    paciente: string;
+    fecha: string;
+    hora: string;
+  }) {
+    return this.turnoService.crearTurno(
+      data.paciente,
+      data.fecha,
+      data.hora,
+    );
+  }
 }

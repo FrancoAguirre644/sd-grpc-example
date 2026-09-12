@@ -33,4 +33,18 @@ export class TurnoService {
   obtenerTurno(id: number) {
     return this.turnos.find((turno) => turno.id === id);
   }
+
+  crearTurno(paciente: string, fecha: string, hora: string) {
+    const nuevoTurno = {
+      id: this.turnos.length + 1,
+      paciente,
+      fecha,
+      hora,
+      estado: 'DISPONIBLE',
+    };
+
+    this.turnos.push(nuevoTurno);
+
+    return nuevoTurno;
+  }
 }
