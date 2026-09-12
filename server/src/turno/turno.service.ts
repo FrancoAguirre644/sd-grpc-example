@@ -29,4 +29,8 @@ export class TurnoService {
   listarTurnos() {
     return this.turnos;
   }
+
+  obtenerTurno(id: number) {
+    return this.turnos.find((turno) => turno.id === id);
+  }
 }

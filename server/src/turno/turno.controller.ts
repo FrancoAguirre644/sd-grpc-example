@@ -13,4 +13,9 @@ export class TurnoController {
       turnos: this.turnoService.listarTurnos(),
     };
   }
+
+  @GrpcMethod('TurnoService', 'ObtenerTurno')
+  obtenerTurno(data: { id: number }) {
+    return this.turnoService.obtenerTurno(data.id);
+  }
 }
