@@ -20,6 +20,16 @@ export async function listarTurnos(): Promise<Turno[]> {
   return data.turnos
 }
 
+export async function obtenerTurno(id: number): Promise<Turno> {
+  const response = await fetch(`${API_URL}/turnos/${id}`)
+
+  if (!response.ok) {
+    throw new Error('No se pudo obtener el turno.')
+  }
+
+  return response.json()
+}
+
 export async function crearTurno(
   paciente: string,
   fecha: string,
