@@ -1,13 +1,12 @@
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 
-interface Turno {
-  id: number
-  paciente: string
-  fecha: string
-  hora: string
-  estado: string
-}
+import {
+  crearTurno,
+  listarTurnos,
+  reservarTurno,
+  type Turno,
+} from './api/turnos'
 
 const turnos = ref<Turno[]>([])
 const loading = ref(false)
@@ -25,15 +24,7 @@ async function cargarTurnos() {
   error.value = ''
 
   try {
-    const response = await fetch('http://localhost:8000/turnos')
-
-    if (!response.ok) {
-      throw new Error('No se pudieron obtener los turnos.')
-    }
-
-    const data = await response.json()
-
-    turnos.value = data.turnos
+    turnos.value = await listarTurnos()
   } catch (err) {
     error.value = 'No se pudieron cargar los turnos.'
   } finally {
@@ -41,27 +32,17 @@ async function cargarTurnos() {
   }
 }
 
-async function crearTurno() {
+async function crearNuevoTurno() {
   creating.value = true
   error.value = ''
   success.value = ''
 
   try {
-    const response = await fetch('http://localhost:8000/turnos', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        paciente: paciente.value,
-        fecha: fecha.value,
-        hora: hora.value,
-      }),
-    })
-
-    if (!response.ok) {
-      throw new Error('No se pudo crear el turno.')
-    }
+    await crearTurno(
+      paciente.value,
+      fecha.value,
+      hora.value,
+    )
 
     paciente.value = ''
     fecha.value = ''
@@ -77,22 +58,13 @@ async function crearTurno() {
   }
 }
 
-async function reservarTurno(id: number) {
+async function reservar(id: number) {
   reserving.value = id
   error.value = ''
   success.value = ''
 
   try {
-    const response = await fetch(
-      `http://localhost:8000/turnos/${id}/reservar`,
-      {
-        method: 'POST',
-      },
-    )
-
-    if (!response.ok) {
-      throw new Error('No se pudo reservar el turno.')
-    }
+    await reservarTurno(id)
 
     success.value = 'Turno reservado correctamente.'
 
@@ -130,7 +102,7 @@ onMounted(() => {
 
         <form
           class="grid gap-4 md:grid-cols-4"
-          @submit.prevent="crearTurno"
+          @submit.prevent="crearNuevoTurno"
         >
           <div class="md:col-span-2">
             <label
@@ -292,7 +264,7 @@ onMounted(() => {
                     type="button"
                     :disabled="reserving === turno.id"
                     class="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
-                    @click="reservarTurno(turno.id)"
+                    @click="reservar(turno.id)"
                   >
                     {{ reserving === turno.id ? 'Reservando...' : 'Reservar' }}
                   </button>
