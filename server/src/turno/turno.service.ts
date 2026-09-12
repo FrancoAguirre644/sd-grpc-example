@@ -47,4 +47,16 @@ export class TurnoService {
 
     return nuevoTurno;
   }
+
+  reservarTurno(id: number) {
+    const turno = this.turnos.find((turno) => turno.id === id);
+
+    if (!turno) {
+      return undefined;
+    }
+
+    turno.estado = 'RESERVADO';
+
+    return turno;
+  }
 }

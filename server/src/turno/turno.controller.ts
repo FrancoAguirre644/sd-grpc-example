@@ -31,4 +31,9 @@ export class TurnoController {
       data.hora,
     );
   }
+
+  @GrpcMethod('TurnoService', 'ReservarTurno')
+  reservarTurno(data: { id: number }) {
+    return this.turnoService.reservarTurno(data.id);
+  }
 }
