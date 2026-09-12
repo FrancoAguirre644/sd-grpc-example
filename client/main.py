@@ -24,82 +24,99 @@ class CrearTurnoRequest(BaseModel):
     hora: str
 
 
-@app.get('/turnos')
-def listar_turnos():
-    response = grpc_client.ListarTurnos(
-        turnos_pb2.ListarTurnosRequest()
+def handle_grpc_error(error: grpc.RpcError):
+    if error.code() == grpc.StatusCode.NOT_FOUND:
+        raise HTTPException(
+            status_code=404,
+            detail=error.details(),
+        )
+
+    raise HTTPException(
+        status_code=500,
+        detail='Error interno del servicio gRPC',
     )
 
-    return {
-        'turnos': [
-            {
-                'id': turno.id,
-                'paciente': turno.paciente,
-                'fecha': turno.fecha,
-                'hora': turno.hora,
-                'estado': turno.estado,
-            }
-            for turno in response.turnos
-        ]
-    }
+
+@app.get('/turnos')
+def listar_turnos():
+    try:
+        response = grpc_client.ListarTurnos(
+            turnos_pb2.ListarTurnosRequest()
+        )
+
+        return {
+            'turnos': [
+                {
+                    'id': turno.id,
+                    'paciente': turno.paciente,
+                    'fecha': turno.fecha,
+                    'hora': turno.hora,
+                    'estado': turno.estado,
+                }
+                for turno in response.turnos
+            ]
+        }
+
+    except grpc.RpcError as error:
+        handle_grpc_error(error)
 
 
 @app.get('/turnos/{id}')
 def obtener_turno(id: int):
-    response = grpc_client.ObtenerTurno(
-        turnos_pb2.ObtenerTurnoRequest(id=id)
-    )
-
-    if response.id == 0:
-        raise HTTPException(
-            status_code=404,
-            detail='Turno no encontrado',
+    try:
+        response = grpc_client.ObtenerTurno(
+            turnos_pb2.ObtenerTurnoRequest(id=id)
         )
 
-    return {
-        'id': response.id,
-        'paciente': response.paciente,
-        'fecha': response.fecha,
-        'hora': response.hora,
-        'estado': response.estado,
-    }
+        return {
+            'id': response.id,
+            'paciente': response.paciente,
+            'fecha': response.fecha,
+            'hora': response.hora,
+            'estado': response.estado,
+        }
+
+    except grpc.RpcError as error:
+        handle_grpc_error(error)
 
 
 @app.post('/turnos')
 def crear_turno(data: CrearTurnoRequest):
-    response = grpc_client.CrearTurno(
-        turnos_pb2.CrearTurnoRequest(
-            paciente=data.paciente,
-            fecha=data.fecha,
-            hora=data.hora,
+    try:
+        response = grpc_client.CrearTurno(
+            turnos_pb2.CrearTurnoRequest(
+                paciente=data.paciente,
+                fecha=data.fecha,
+                hora=data.hora,
+            )
         )
-    )
 
-    return {
-        'id': response.id,
-        'paciente': response.paciente,
-        'fecha': response.fecha,
-        'hora': response.hora,
-        'estado': response.estado,
-    }
+        return {
+            'id': response.id,
+            'paciente': response.paciente,
+            'fecha': response.fecha,
+            'hora': response.hora,
+            'estado': response.estado,
+        }
+
+    except grpc.RpcError as error:
+        handle_grpc_error(error)
 
 
 @app.post('/turnos/{id}/reservar')
 def reservar_turno(id: int):
-    response = grpc_client.ReservarTurno(
-        turnos_pb2.ReservarTurnoRequest(id=id)
-    )
-
-    if response.id == 0:
-        raise HTTPException(
-            status_code=404,
-            detail='Turno no encontrado',
+    try:
+        response = grpc_client.ReservarTurno(
+            turnos_pb2.ReservarTurnoRequest(id=id)
         )
 
-    return {
-        'id': response.id,
-        'paciente': response.paciente,
-        'fecha': response.fecha,
-        'hora': response.hora,
-        'estado': response.estado,
-    }
+        return {
+            'id': response.id,
+            'paciente': response.paciente,
+            'fecha': response.fecha,
+            'hora': response.hora,
+            'estado': response.estado,
+        }
+
+    except grpc.RpcError as error:
+        handle_grpc_error(error)

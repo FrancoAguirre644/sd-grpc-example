@@ -1,5 +1,5 @@
 import { Controller } from '@nestjs/common';
-import { GrpcMethod } from '@nestjs/microservices';
+import { GrpcMethod, RpcException } from '@nestjs/microservices';
 
 import { CrearTurnoDto } from './dto/crear-turno.dto';
 import { TurnoService } from './turno.service';
@@ -16,8 +16,17 @@ export class TurnoController {
   }
 
   @GrpcMethod('TurnoService', 'ObtenerTurno')
-  obtenerTurno(data: { id: number }) {
-    return this.turnoService.obtenerTurno(data.id);
+  async obtenerTurno(data: { id: number }) {
+    const turno = await this.turnoService.obtenerTurno(data.id);
+
+    if (!turno) {
+      throw new RpcException({
+        code: 5,
+        message: 'Turno no encontrado',
+      });
+    }
+
+    return turno;
   }
 
   @GrpcMethod('TurnoService', 'CrearTurno')
@@ -26,7 +35,16 @@ export class TurnoController {
   }
 
   @GrpcMethod('TurnoService', 'ReservarTurno')
-  reservarTurno(data: { id: number }) {
-    return this.turnoService.reservarTurno(data.id);
+  async reservarTurno(data: { id: number }) {
+    const turno = await this.turnoService.reservarTurno(data.id);
+
+    if (!turno) {
+      throw new RpcException({
+        code: 5,
+        message: 'Turno no encontrado',
+      });
+    }
+
+    return turno;
   }
 }
