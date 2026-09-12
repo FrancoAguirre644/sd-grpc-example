@@ -1,18 +1,16 @@
-import grpc
+import sys
 
+import grpc
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+
+sys.path.append('generated')
 
 import turnos_pb2
 import turnos_pb2_grpc
 
 
-app = FastAPI(
-    title='Turnos API',
-    description='HTTP API that communicates with the Turnos gRPC service',
-    version='1.0.0',
-)
-
+app = FastAPI()
 
 channel = grpc.insecure_channel('localhost:5000')
 grpc_client = turnos_pb2_grpc.TurnoServiceStub(channel)

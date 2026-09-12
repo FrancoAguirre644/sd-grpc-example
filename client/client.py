@@ -1,7 +1,7 @@
 import grpc
 
-import turnos_pb2
-import turnos_pb2_grpc
+from grpc import turnos_pb2
+from grpc import turnos_pb2_grpc
 
 
 def main():
