@@ -2,6 +2,7 @@ import sys
 
 import grpc
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
 sys.path.append('generated')
@@ -11,6 +12,15 @@ import turnos_pb2_grpc
 
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=['http://localhost:5173'],
+    allow_credentials=True,
+    allow_methods=['*'],
+    allow_headers=['*'],
+)
+
 
 channel = grpc.insecure_channel('localhost:5000')
 grpc_client = turnos_pb2_grpc.TurnoServiceStub(channel)
